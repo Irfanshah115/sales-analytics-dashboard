@@ -1,0 +1,128 @@
+import pandas as pd
+
+# STEP 1: Data
+sales_data = [
+    {"product": "Laptop", "category": "Electronics", "quantity": 5, "price": 50000, "month": "January"},
+    {"product": "Mouse", "category": "Electronics", "quantity": 25, "price": 500, "month": "January"},
+    {"product": "Keyboard", "category": "Electronics", "quantity": 15, "price": 2000, "month": "January"},
+    {"product": "Monitor", "category": "Electronics", "quantity": 8, "price": 25000, "month": "January"},
+    {"product": "Laptop", "category": "Electronics", "quantity": 7, "price": 50000, "month": "February"},
+    {"product": "Mouse", "category": "Electronics", "quantity": 30, "price": 500, "month": "February"},
+    {"product": "Desk", "category": "Furniture", "quantity": 10, "price": 15000, "month": "January"},
+    {"product": "Chair", "category": "Furniture", "quantity": 20, "price": 8000, "month": "January"},
+    {"product": "Desk", "category": "Furniture", "quantity": 12, "price": 15000, "month": "February"},
+    {"product": "Headphones", "category": "Electronics", "quantity": 40, "price": 3000, "month": "February"}
+]
+
+df = pd.DataFrame(sales_data)
+
+print("="*70)
+print("📊 SALES DASHBOARD - MONTHLY ANALYSIS")
+print("="*70)
+print("\n📦 Raw Sales Data:")
+print(df)
+
+# STEP 2: Revenue
+df["revenue"] = df["quantity"] * df["price"]
+
+# STEP 3: Statistics
+print("\n" + "="*70)
+print("📈 OVERALL BUSINESS METRICS")
+print("="*70)
+
+total_revenue = df["revenue"].sum()
+total_quantity = df["quantity"].sum()
+avg_order_value = df["revenue"].mean()
+
+print(f"💵 Total Revenue: Rs. {total_revenue:,.0f}")
+print(f"📦 Total Units Sold: {total_quantity}")
+print(f"💳 Average Order Value: Rs. {avg_order_value:,.2f}")
+print(f"🛍️  Total Transactions: {len(df)}")
+
+# STEP 4: Top Products
+print("\n" + "="*70)
+print("🏆 TOP 5 PRODUCTS BY REVENUE")
+print("="*70)
+
+top_products = df.nlargest(5, "revenue")
+
+for idx, row in top_products.iterrows():
+    print(f"{idx+1}. {row['product']}")
+    print(f"   Category: {row['category']}")
+    print(f"   Quantity: {row['quantity']} units")
+    print(f"   Revenue: Rs. {row['revenue']:,}")
+    print()
+
+# STEP 5: Category Analysis
+print("="*70)
+print("📊 CATEGORY-WISE PERFORMANCE")
+print("="*70)
+
+category_sales = df.groupby("category")["revenue"].sum().sort_values(ascending=False)
+
+for category, revenue in category_sales.items():
+    percentage = (revenue / total_revenue) * 100
+    print(f"{category}:")
+    print(f"  Revenue: Rs. {revenue:,}")
+    print(f"  Share: {percentage:.1f}%")
+    print()
+
+# STEP 6: Monthly Trends
+print("="*70)
+print("📅 MONTHLY SALES TREND")
+print("="*70)
+
+monthly_sales = df.groupby("month")["revenue"].sum()
+
+for month, revenue in monthly_sales.items():
+    print(f"{month}: Rs. {revenue:,}")
+
+months = list(monthly_sales.index)
+if len(months) >= 2:
+    jan = monthly_sales[months[0]]
+    feb = monthly_sales[months[1]]
+    growth = ((feb - jan) / jan) * 100
+    
+    print(f"\n📈 Growth Rate: {growth:+.1f}%")
+    if growth > 0:
+        print("✅ Sales are increasing!")
+    else:
+        print("⚠️  Sales are decreasing")
+
+# STEP 7: Best/Worst
+print("\n" + "="*70)
+print("🌟 BEST & WORST PERFORMERS")
+print("="*70)
+
+best_product = df.nlargest(1, "revenue").iloc[0]
+worst_product = df.nsmallest(1, "revenue").iloc[0]
+
+print("🏆 BEST PERFORMER:")
+print(f"   Product: {best_product['product']}")
+print(f"   Revenue: Rs. {best_product['revenue']:,}")
+print(f"   Month: {best_product['month']}")
+
+print("\n⚠️  WORST PERFORMER:")
+print(f"   Product: {worst_product['product']}")
+print(f"   Revenue: Rs. {worst_product['revenue']:,}")
+print(f"   Month: {worst_product['month']}")
+
+# STEP 8: Insights
+print("\n" + "="*70)
+print("💡 BUSINESS INSIGHTS")
+print("="*70)
+
+high_value = df[df["revenue"] > 100000]
+print(f"✅ {len(high_value)} high-value transactions (>Rs. 100,000)")
+
+low_stock = df[df["quantity"] < 10]
+if len(low_stock) > 0:
+    print(f"⚠️  {len(low_stock)} products with low quantity (<10 units)")
+    print(f"   Products: {', '.join(low_stock['product'].unique())}")
+
+most_sold = df.nlargest(1, "quantity").iloc[0]
+print(f"\n📦 Most Popular Product: {most_sold['product']} ({most_sold['quantity']} units)")
+
+print("\n" + "="*70)
+print("✅ DASHBOARD COMPLETE!")
+print("="*70)
